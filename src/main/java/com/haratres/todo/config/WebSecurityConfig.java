@@ -37,15 +37,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/login","/user/login").permitAll()
-                        .requestMatchers("/admin/register").hasRole("ADMIN")
-                        .requestMatchers("/task/**","/task/delete/**","/task/update/**","/task/title/**","/task/sort").hasRole("USER")
-
-                        .anyRequest().authenticated()
-
-                )
-                .exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedEntryPoint)) // bu çok kritik!
+                //.exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -63,12 +55,11 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // Optional: DaoAuthenticationProvider kullanmak istersen
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
+//    @Bean
+//    public AuthenticationProvider authenticationProvider() {
+//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+//        authProvider.setUserDetailsService(userDetailsService);
+//        authProvider.setPasswordEncoder(passwordEncoder());
+//        return authProvider;
+//    }
 }

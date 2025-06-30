@@ -19,16 +19,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/task")
 public class TasksController {
 
-    private final ModelMapper modelMapper;
-    private final UserUtil userUtil;
-    private final TasksService tasksService;
+    @Autowired
+    ModelMapper modelMapper;
 
     @Autowired
-    public TasksController(ModelMapper modelMapper, UserUtil userUtil, TasksService tasksService) {
-        this.modelMapper = modelMapper;
-        this.userUtil = userUtil;
-        this.tasksService = tasksService;
-    }
+    UserUtil userUtil;
+
+    @Autowired
+    TasksService tasksService;
+
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/create")
@@ -90,5 +89,3 @@ public class TasksController {
         return tasks.stream().map(tasks1 -> modelMapper.map(tasks,TasksDto.class)).collect(Collectors.toList());
     }
 }
-
-//validations oluştur

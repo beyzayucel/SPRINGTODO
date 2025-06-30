@@ -9,6 +9,7 @@ import com.haratres.todo.entity.Users;
 import com.haratres.todo.repository.RolesRepository;
 import com.haratres.todo.repository.UsersRepository;
 import com.haratres.todo.services.user.UsersService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,24 +28,20 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final UsersRepository usersRepository;
-    private final UsersService usersService;
-    private final RolesRepository rolesRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    UsersRepository usersRepository;
 
+    @Autowired
+    UsersService usersService;
 
-    private final TokenProvider tokenProvider;
+    @Autowired
+    RolesRepository rolesRepository;
 
-    public AdminController(UsersRepository usersRepository, UsersService usersService,
-                           RolesRepository rolesRepository,
-                           PasswordEncoder passwordEncoder,
-                           TokenProvider tokenProvider) {
-        this.usersRepository = usersRepository;
-        this.usersService = usersService;
-        this.rolesRepository = rolesRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenProvider = tokenProvider;
-    }
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    TokenProvider tokenProvider;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsersDto loginUserDto) {
@@ -65,7 +62,7 @@ public class AdminController {
                 authorities
         );
 
-        String token = tokenProvider.generateToken(authentication);
+        String token = tokenProvider.createToken(authentication);
         return ResponseEntity.ok(token);
     }
 
@@ -122,15 +119,6 @@ public class AdminController {
 
         return ResponseEntity.ok(userDtos);
     }
-
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/admin/users-tasks")
-    public List<Map<String, Object>> getAllUsersWithTasks() {
-        return usersService.getAllUsersWithTasks();
-    }
-
-
 
 }
 
