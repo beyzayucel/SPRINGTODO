@@ -15,7 +15,6 @@ public class UnauthorizedEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        // Yetkisiz isteklerde 401 Unauthorized döndür
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
 }

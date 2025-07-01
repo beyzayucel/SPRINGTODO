@@ -49,13 +49,9 @@ public class Users {
 
 
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinTable(
-            name = "users_tasks",
-            joinColumns=@JoinColumn(name = "users_id"),
-            inverseJoinColumns = @JoinColumn(name = "tasks_id")
-    )
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
     private List<Tasks> tasks;
+
 
 
     public void addTasks(Tasks theTasks){
