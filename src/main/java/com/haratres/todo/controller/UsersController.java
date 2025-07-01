@@ -37,7 +37,7 @@ public class UsersController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
+    @PreAuthorize("permitAll()")
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> generateToken(@RequestBody UsersDto loginUser) throws AuthenticationException {
 
@@ -48,11 +48,11 @@ public class UsersController {
                 )
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        final String token = jwtTokenUtil.generateToken(authentication);
+        String token = jwtTokenUtil.createToken(authentication);
         return ResponseEntity.ok(new AuthTokenDto(token));
     }
 
-
+    @PreAuthorize("permitAll()")
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UsersDto usersDto) {
         if (usersDto.getEmail() == null || usersDto.getPassword() == null) {
