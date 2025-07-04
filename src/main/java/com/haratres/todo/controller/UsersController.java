@@ -2,10 +2,8 @@ package com.haratres.todo.controller;
 
 import com.haratres.todo.config.TokenProvider;
 import com.haratres.todo.config.Validationhandler;
-import com.haratres.todo.dto.AuthTokenDto;
-import com.haratres.todo.dto.UsersDto;
+import com.haratres.todo.dto.*;
 import com.haratres.todo.entity.Users;
-import com.haratres.todo.repository.UsersRepository;
 import com.haratres.todo.services.user.UsersService;
 import com.haratres.todo.validators.UsersValidators;
 import jakarta.annotation.security.PermitAll;
@@ -42,10 +40,6 @@ public class UsersController {
 
     @Autowired
     private Validationhandler validationhandler;
-
-    @Autowired
-    private UsersRepository usersRepository;
-
 
 
     @PermitAll
@@ -85,7 +79,6 @@ public class UsersController {
 
         return ResponseEntity.ok(savedUser);
     }
-
 
 
 }

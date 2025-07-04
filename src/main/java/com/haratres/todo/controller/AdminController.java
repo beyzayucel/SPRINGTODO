@@ -1,6 +1,5 @@
 package com.haratres.todo.controller;
 
-
 import com.haratres.todo.config.TokenProvider;
 import com.haratres.todo.dto.TasksDto;
 import com.haratres.todo.dto.UsersDto;
@@ -8,7 +7,6 @@ import com.haratres.todo.entity.Roles;
 import com.haratres.todo.entity.Users;
 import com.haratres.todo.repository.RolesRepository;
 import com.haratres.todo.repository.UsersRepository;
-import com.haratres.todo.services.user.UsersService;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 

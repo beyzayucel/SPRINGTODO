@@ -47,6 +47,8 @@ public class Users {
     @JsonManagedReference("user-role")
     private Set<Roles> roles;
 
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Otp> otps = new ArrayList<>();
 
 
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
