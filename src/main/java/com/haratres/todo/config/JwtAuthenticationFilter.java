@@ -1,6 +1,7 @@
 
 package com.haratres.todo.config;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,19 +32,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String email = null;
         String authToken = jwtTokenUtil.resolveToken(req);
 
-        if(authToken!=null&& !authToken.trim().isEmpty()){
+        if(!StringUtils.isBlank(authToken)){
             email = jwtTokenUtil.getEmailFromToken(authToken);}
         else{
-            System.out.println("Kimlik doğrulama başarısız.Email veya parola geçersiz");}
+            System.out.println("Authentication failed. Email or password is invalid.");}
 
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {//kullanıcı sisteme tanıtılmamışsa
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
             if (jwtTokenUtil.validateToken(authToken)) {
                 UsernamePasswordAuthenticationToken authentication =
                         jwtTokenUtil.getAuthenticationToken(authToken, userDetails);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-                logger.info("authenticated user " + email + ", setting security context");
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }

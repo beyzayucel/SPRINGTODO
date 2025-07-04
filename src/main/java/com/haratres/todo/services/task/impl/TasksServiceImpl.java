@@ -53,7 +53,11 @@ public class TasksServiceImpl implements TasksService {
                 .findFirst()
                 .orElse(null);
 
+
         if (!targetTask.equals(null)) {
+            if (targetTask.getStatus().equals(TasksStatus.CREATED)) {
+                targetTask.setStatus(TasksStatus.IN_PROGRESS);
+            }
             targetTask.setTitle(tasksDTO.getTitle());
             targetTask.setDescription(tasksDTO.getDescription());
             targetTask.setImportant(tasksDTO.getImportant());
@@ -64,7 +68,7 @@ public class TasksServiceImpl implements TasksService {
         return null;
     }
 
-    public Boolean deleteTasks(int id,Users user) {
+    public Boolean deleteTasks(int id, Users user) {
 
         List<Tasks> tasksList = user.getTasks();
 
@@ -73,12 +77,11 @@ public class TasksServiceImpl implements TasksService {
                 .findFirst()
                 .orElse(null);
 
-        if(targetTask.equals(null)){
-            int taskId=targetTask.getId();
-            tasksRepository.deleteById(taskId);
-            return true;
+        if (targetTask.equals(null)) {
+            return false;
         }
-        return null;
+        tasksRepository.deleteById(id);
+        return true;
     }
 
     public Tasks getTasksTitle(String title, Users users) {
@@ -90,15 +93,18 @@ public class TasksServiceImpl implements TasksService {
                 .orElse(null);
 
         if (targetTask.equals(null)) {
-            throw new RuntimeException(title+" bulunamadı.");
+            throw new RuntimeException(title + " not found.");
         }
 
         return targetTask;
     }
 
-    public List<Tasks> sortForTitle(Users users){
+    public List<Tasks> getStatus(TasksStatus tasksStatus, Users users) {
+        return tasksRepository.getStatus(tasksStatus, users);
+    }
 
-        return tasksRepository.sortByTitle(users);
+    public List<Tasks> sortForDate(Users users) {
+        return tasksRepository.sortByDate(users);
     }
 
 }

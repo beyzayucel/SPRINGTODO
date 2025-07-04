@@ -1,13 +1,11 @@
 package com.haratres.todo.services.user.impl;
 
 import com.haratres.todo.entity.Roles;
-import com.haratres.todo.entity.Tasks;
 import com.haratres.todo.entity.Users;
 import com.haratres.todo.repository.RolesRepository;
 import com.haratres.todo.repository.UsersRepository;
 import com.haratres.todo.services.user.UsersService;
 import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

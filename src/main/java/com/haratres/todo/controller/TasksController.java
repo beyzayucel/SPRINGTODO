@@ -1,6 +1,6 @@
 package com.haratres.todo.controller;
 
-
+import com.haratres.todo.config.Validationhandler;
 import com.haratres.todo.dto.TasksDto;
 import com.haratres.todo.entity.Tasks;
 import com.haratres.todo.entity.Users;
@@ -8,24 +8,17 @@ import com.haratres.todo.services.task.TasksService;
 import com.haratres.todo.util.UserUtil;
 import com.haratres.todo.validators.TasksValidators;
 import jakarta.servlet.http.HttpServletRequest;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/task")
-public class TasksController {
-
-    @Autowired
-    ModelMapper modelMapper;
+public class TasksController extends BaseController{
 
     @Autowired
     UserUtil userUtil;
@@ -36,25 +29,17 @@ public class TasksController {
     @Autowired
     TasksValidators tasksValidators;
 
+    @Autowired
+    Validationhandler validationhandler;
+
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/create")
     public ResponseEntity<?> createTasks(@RequestBody TasksDto tasksDTO, HttpServletRequest request, Errors errors) {
 
         tasksValidators.validate(tasksDTO,errors);
-
         if (errors.hasErrors()) {
-            List<Map<String, String>> errorList = errors.getAllErrors().stream()
-                    .map(error -> {
-                        Map<String, String> map = new HashMap<>();
-                        map.put("code", error.getCode());
-                        map.put("message", error.getDefaultMessage());
-                        return map;
-                    })
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.badRequest().body(errorList);
+            return ResponseEntity.badRequest().body(validationhandler.validate(errors));
         }
-
 
         Users users=userUtil.tokenProcess(request);
 
@@ -80,7 +65,7 @@ public class TasksController {
 
         Users users=userUtil.tokenProcess(request);
         tasksService.updateTasks(id,tasksDTO,users);
-        return ResponseEntity.ok("Başarıyla Güncellendi");
+        return ResponseEntity.ok("Successfully Updated");
     }
 
     @PreAuthorize("hasRole('USER')")
@@ -89,7 +74,7 @@ public class TasksController {
 
         Users users=userUtil.tokenProcess(request);
         tasksService.deleteTasks(id,users);
-        return ResponseEntity.ok("Başarıyla Silindi");
+        return ResponseEntity.ok("Successfully Deleted");
     }
 
     @PreAuthorize("hasRole('USER')")
@@ -102,14 +87,24 @@ public class TasksController {
         return modelMapper.map(tasksTitle,TasksDto.class);
     }
 
-
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/sort")
-    public List<TasksDto> getSort(HttpServletRequest request){
+    @GetMapping("/status/{status}")
+    public List<TasksDto> getStatus(@PathVariable TasksStatus status,HttpServletRequest request){
         Users users=userUtil.tokenProcess(request);
 
-        List<Tasks> tasks=tasksService.sortForTitle(users);
+        List<Tasks> tasksTitle=tasksService.getStatus(status,users);
+        return tasksTitle.stream().map(task -> modelMapper.map(task,TasksDto.class)).collect(Collectors.toList());
+    }
 
-        return tasks.stream().map(tasks1 -> modelMapper.map(tasks1,TasksDto.class)).collect(Collectors.toList());
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/sortDate")
+    public List<TasksDto> getSortDate(HttpServletRequest request){
+        Users users=userUtil.tokenProcess(request);
+
+        List<Tasks> tasks=tasksService.sortForDate(users);
+
+        return tasks.stream().map(task -> modelMapper.map(task,TasksDto.class)).collect(Collectors.toList());
+
+
     }
 }

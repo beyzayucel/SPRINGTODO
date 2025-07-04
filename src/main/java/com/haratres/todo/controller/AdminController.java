@@ -45,10 +45,10 @@ public class AdminController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsersDto loginUserDto) {
         Users user = usersRepository.findByEmail(loginUserDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                .orElseThrow(() -> new RuntimeException("User didn't find."));
 
         if (!passwordEncoder.matches(loginUserDto.getPassword(), user.getPassword())) {
-            return ResponseEntity.badRequest().body("Şifre yanlış");
+            return ResponseEntity.badRequest().body("Wrong password.");
         }
 
         List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
@@ -86,7 +86,7 @@ public class AdminController {
 
         usersRepository.save(newAdmin);
 
-        return ResponseEntity.ok("Admin başarıyla eklendi.");
+        return ResponseEntity.ok("Admin added successfully.");
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -117,6 +117,5 @@ public class AdminController {
 
         return ResponseEntity.ok(userDtos);
     }
-
-}
+    }
 

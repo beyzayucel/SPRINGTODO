@@ -1,9 +1,11 @@
 package com.haratres.todo.controller;
 
 import com.haratres.todo.config.TokenProvider;
+import com.haratres.todo.config.Validationhandler;
 import com.haratres.todo.dto.AuthTokenDto;
 import com.haratres.todo.dto.UsersDto;
 import com.haratres.todo.entity.Users;
+import com.haratres.todo.repository.UsersRepository;
 import com.haratres.todo.services.user.UsersService;
 import com.haratres.todo.validators.UsersValidators;
 import jakarta.annotation.security.PermitAll;
@@ -18,10 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
@@ -42,9 +40,17 @@ public class UsersController {
     @Autowired
     private UsersValidators usersValidators;
 
+    @Autowired
+    private Validationhandler validationhandler;
+
+    @Autowired
+    private UsersRepository usersRepository;
+
+
+
     @PermitAll
     @PostMapping("/login")
-    public ResponseEntity<?> generateToken(@RequestBody UsersDto loginUser) throws AuthenticationException {
+    public ResponseEntity<?> login(@RequestBody UsersDto loginUser) throws AuthenticationException {
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -62,19 +68,10 @@ public class UsersController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UsersDto usersDto, Errors errors) {
 
-        usersValidators.validate(usersDto,errors);
+        usersValidators.validate(usersDto, errors);
 
         if (errors.hasErrors()) {
-            List<Map<String, String>> errorList = errors.getAllErrors().stream()
-                    .map(error -> {
-                        Map<String, String> map = new HashMap<>();
-                        map.put("code", error.getCode());
-                        map.put("message", error.getDefaultMessage());
-                        return map;
-                    })
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.badRequest().body(errorList);
+            return ResponseEntity.badRequest().body(validationhandler.validate(errors));
         }
 
         Users user = new Users();

@@ -1,6 +1,7 @@
 package com.haratres.todo.config;
 
 import io.jsonwebtoken.*;
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -77,9 +78,9 @@ public class TokenProvider {
                 .setSigningKey(SIGNING_KEY)
                 .parseClaimsJws(token)
                 .getBody();
-
         String authoritiesClaim = (String) claims.get(AUTHORITIES_KEY);
-        if (authoritiesClaim == null || authoritiesClaim.trim().isEmpty()) {
+
+        if (StringUtils.isBlank(authoritiesClaim)) {
             authoritiesClaim = "ROLE_USER";
         }
 
