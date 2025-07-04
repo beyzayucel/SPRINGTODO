@@ -1,13 +1,11 @@
 package com.haratres.todo.services.user.impl;
 
 import com.haratres.todo.entity.Roles;
-import com.haratres.todo.entity.Tasks;
 import com.haratres.todo.entity.Users;
 import com.haratres.todo.repository.RolesRepository;
 import com.haratres.todo.repository.UsersRepository;
 import com.haratres.todo.services.user.UsersService;
 import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,43 +17,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Transactional
-@Service("userService")
+@Service
 public class UsersServiceImpl implements UsersService, UserDetailsService {
 
+    @Autowired
     UsersRepository usersRepository;
-    ModelMapper modelMapper;
-    RolesRepository rolesRepository;
 
     @Autowired
-    public UsersServiceImpl(UsersRepository usersRepository,ModelMapper modelMapper,RolesRepository rolesRepository) {
-        this.usersRepository = usersRepository;
-        this.modelMapper=modelMapper;
-        this.rolesRepository=rolesRepository;
-    }
-
-    @Override
-    public List<Users> allGetUsers() {
-        List<Users> users=usersRepository.findAll();
-        return users;
-    }
-
-    @Override
-    public Users getById(int id) {
-        Optional<Users> u=usersRepository.findById(id);
-        Users users=null;
-        if(u.isPresent()){
-            users=u.get();
-        }
-        else{
-            throw new RuntimeException("Girilen id bulunamadı.");
-        }
-        return users;
-    }
-
-    @Override
-    public void delete(int id) {
-        usersRepository.deleteById(id);
-    }
+    RolesRepository rolesRepository;
 
 
     @Override
@@ -67,8 +36,6 @@ public class UsersServiceImpl implements UsersService, UserDetailsService {
         }
         return usersRepository.save(users);
     }
-
-
 
 
     @Override
@@ -85,24 +52,5 @@ public class UsersServiceImpl implements UsersService, UserDetailsService {
                 user.getPassword(),
                 authorities);
     }
-
-    public List<Map<String, Object>> getAllUsersWithTasks() {
-        List<Users> users = usersRepository.findAll();
-
-        return users.stream().map(user -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("email", user.getEmail());
-
-            // Kullanıcının görevlerini sadece görev adları olarak listele
-            List<String> taskNames = user.getTasks().stream()
-                    .map(Tasks::getTitle)
-                    .collect(Collectors.toList());
-
-            map.put("tasks", taskNames);
-            return map;
-        }).collect(Collectors.toList());
-    }
-
-
 
 }

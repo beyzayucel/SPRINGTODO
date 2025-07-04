@@ -21,7 +21,7 @@ public class Tasks {
 
 
     @Column(name = "created_date")
-    private LocalDate createdDate;
+    private String createdDate;
 
 
     @Column(name = "important")
@@ -34,25 +34,14 @@ public class Tasks {
     @Column(name = "description")
     private String description;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},mappedBy ="tasks")
-    private List<Users> users;
-
-    public void addUser(Users user) {
-        if(users == null) {
-            users = new ArrayList<>();
-        }
-        users.add(user);
-    }
-
-
-    public Tasks(TasksStatus status) {
-        this.status = TasksStatus.CREATED;
-    }
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users users;
 
     public Tasks() {
     }
 
-    public Tasks(LocalDate createdDate, String description, String important, TasksStatus status, String title, List<Users> users) {
+    public Tasks(String createdDate, String description,String important, TasksStatus status, String title, Users users) {
         this.createdDate = createdDate;
         this.description = description;
         this.important = important;
@@ -60,7 +49,6 @@ public class Tasks {
         this.title = title;
         this.users = users;
     }
-
 
     public int getId() {
         return id;
@@ -74,11 +62,11 @@ public class Tasks {
         return important;
     }
 
-    public LocalDate getCreatedDate() {
+    public String getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(LocalDate createdDate) {
+    public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
     }
 
@@ -110,22 +98,11 @@ public class Tasks {
         this.important = important;
     }
 
-    public List<Users> getUsers() {
+    public Users getUsers() {
         return users;
     }
 
-    public void setUsers(List<Users> users) {
+    public void setUsers(Users users) {
         this.users = users;
     }
 }
-
-
-/*
-public void addUsers(Users theUsers){
-        if(users==null){
-            users=new ArrayList<>();
-        }
-        users.add(theUsers);
-        theUsers.addTasks(this);
-    }
- */

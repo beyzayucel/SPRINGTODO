@@ -3,48 +3,34 @@ package com.haratres.todo.services.task.impl;
 import com.haratres.todo.dto.TasksDto;
 import com.haratres.todo.entity.Tasks;
 import com.haratres.todo.entity.Users;
+import com.haratres.todo.enums.TasksStatus;
 import com.haratres.todo.repository.TasksRepository;
 import com.haratres.todo.services.task.TasksService;
 import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.sort;
 
 @Transactional
 @Service
 public class TasksServiceImpl implements TasksService {
 
-    TasksRepository tasksRepository;
-    ModelMapper modelMapper;
-
-
     @Autowired
-    public TasksServiceImpl(TasksRepository tasksRepository,ModelMapper modelMapper) {
-        this.tasksRepository = tasksRepository;
-        this.modelMapper=modelMapper;
-    }
+    TasksRepository tasksRepository;
+
 
     @Override
     public Tasks createTasks(TasksDto tasksDTO, Users users) {
         Tasks task = new Tasks();
         task.setTitle(tasksDTO.getTitle());
         task.setDescription(tasksDTO.getDescription());
-        task.setStatus(tasksDTO.getStatus());
+        task.setStatus(TasksStatus.CREATED);
         task.setImportant(tasksDTO.getImportant());
         task.setCreatedDate(tasksDTO.getCreatedDate());
-        List<Users> userList = new ArrayList<>();
-        userList.add(users);
-        task.setUsers(userList);
-
-        task.addUser(users); // bu, Tasks içinde user listesine ekler
-        users.addTasks(task); // bu da Users içinde task listesine ekler
+        task.setUsers(users);
 
         task = tasksRepository.save(task);
 
@@ -54,7 +40,7 @@ public class TasksServiceImpl implements TasksService {
 
 
     public List<Tasks> getTasksForUser(Users users) {
-        List<Tasks> tasks = users.getTasks(); // sadece bu kullanıcıya ait görevler
+        List<Tasks> tasks = users.getTasks();
         return tasks.stream().collect(Collectors.toList());
     }
 
@@ -67,7 +53,11 @@ public class TasksServiceImpl implements TasksService {
                 .findFirst()
                 .orElse(null);
 
-        if (targetTask.equals(null)) {
+
+        if (!targetTask.equals(null)) {
+            if (targetTask.getStatus().equals(TasksStatus.CREATED)) {
+                targetTask.setStatus(TasksStatus.IN_PROGRESS);
+            }
             targetTask.setTitle(tasksDTO.getTitle());
             targetTask.setDescription(tasksDTO.getDescription());
             targetTask.setImportant(tasksDTO.getImportant());
@@ -78,7 +68,7 @@ public class TasksServiceImpl implements TasksService {
         return null;
     }
 
-    public Boolean deleteTasks(int id,Users user) {
+    public Boolean deleteTasks(int id, Users user) {
 
         List<Tasks> tasksList = user.getTasks();
 
@@ -87,12 +77,11 @@ public class TasksServiceImpl implements TasksService {
                 .findFirst()
                 .orElse(null);
 
-        if(targetTask.equals(null)){
-            int taskId=targetTask.getId();
-            tasksRepository.deleteById(taskId);
-            return true;
+        if (targetTask.equals(null)) {
+            return false;
         }
-        return null;
+        tasksRepository.deleteById(id);
+        return true;
     }
 
     public Tasks getTasksTitle(String title, Users users) {
@@ -104,41 +93,18 @@ public class TasksServiceImpl implements TasksService {
                 .orElse(null);
 
         if (targetTask.equals(null)) {
-            throw new RuntimeException(title+" bulunamadı.");
+            throw new RuntimeException(title + " not found.");
         }
 
         return targetTask;
     }
 
-    public List<Tasks> sortForTitle(Users users){
-
-        List<Tasks> tasksList = users.getTasks();
-
-        tasksList.sort(Comparator.comparing(tasks -> tasks.getTitle().toLowerCase()));
-
-
-        return tasksList;
+    public List<Tasks> getStatus(TasksStatus tasksStatus, Users users) {
+        return tasksRepository.getStatus(tasksStatus, users);
     }
 
-
-
-    //    public List<TasksDto> getTasksStatus(String status) {
-//        List<Tasks> tasksList = tasksRepository.findByTitle(status);
-//        return tasksList.stream().map(task -> modelMapper.map(task, TasksDto.class)).collect(Collectors.toList());
-//    }
-//
-//
-//    public TasksDto updateStatus(int id, TasksStatus newStatus){
-//        Optional<Tasks> optionalTasks=tasksRepository.findById(id);
-//        optionalTasks.get().setStatus(newStatus);
-//        Tasks tasks=tasksRepository.save(optionalTasks.get());
-//        return modelMapper.map(tasks, TasksDto.class);
-//    }
-//
-//    public List<TasksDto> getByDate(LocalDate date){
-//        List<Tasks> tasksList=tasksRepository.findAll();
-//        List<TasksDto> tasksDTO=tasksList.stream().sorted(Comparator.comparing(tasks -> tasks.getCreatedDate().isAfter(date))).map(tasks -> modelMapper.map(tasks, TasksDto.class)).collect(Collectors.toList());
-//        return tasksDTO;
-//    }
+    public List<Tasks> sortForDate(Users users) {
+        return tasksRepository.sortByDate(users);
+    }
 
 }

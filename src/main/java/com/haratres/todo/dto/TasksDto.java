@@ -10,25 +10,18 @@ import java.time.LocalDate;
 
 public class TasksDto {
     private String title;
-    private LocalDate createdDate;
+    private String createdDate;
     private String important;
     private TasksStatus status;
     private String description;
-    private String userEmail;
     private int id;
 
-
-    public TasksDto(TasksStatus status) {
-        this.status = TasksStatus.CREATED;
-    }
-
-    public TasksDto(LocalDate createdDate, String description, String important, TasksStatus status, String title,String userEmail) {
+    public TasksDto(String createdDate, String description, String important, TasksStatus status, String title) {
         this.createdDate = createdDate;
         this.description = description;
         this.important = important;
         this.status = status;
         this.title = title;
-        this.userEmail=userEmail;
     }
 
     private TasksDto convertToDto(Tasks task) {
@@ -55,11 +48,11 @@ public class TasksDto {
         this.status = status;
     }
 
-    public LocalDate getCreatedDate() {
+    public String getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(LocalDate createdDate) {
+    public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
     }
 
@@ -83,9 +76,6 @@ public class TasksDto {
         return title;
     }
 
-    public String getUserEmail() {
-        return userEmail;
-    }
 
     public int getId() {
         return id;
@@ -95,9 +85,6 @@ public class TasksDto {
         this.id = id;
     }
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
 
     public void setTitle(String title) {
         this.title = title;

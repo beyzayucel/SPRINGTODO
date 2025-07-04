@@ -9,6 +9,7 @@ import com.haratres.todo.entity.Users;
 import com.haratres.todo.repository.RolesRepository;
 import com.haratres.todo.repository.UsersRepository;
 import com.haratres.todo.services.user.UsersService;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,9 +33,6 @@ public class AdminController {
     UsersRepository usersRepository;
 
     @Autowired
-    UsersService usersService;
-
-    @Autowired
     RolesRepository rolesRepository;
 
     @Autowired
@@ -43,13 +41,14 @@ public class AdminController {
     @Autowired
     TokenProvider tokenProvider;
 
+    @PermitAll
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsersDto loginUserDto) {
         Users user = usersRepository.findByEmail(loginUserDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                .orElseThrow(() -> new RuntimeException("User didn't find."));
 
         if (!passwordEncoder.matches(loginUserDto.getPassword(), user.getPassword())) {
-            return ResponseEntity.badRequest().body("Şifre yanlış");
+            return ResponseEntity.badRequest().body("Wrong password.");
         }
 
         List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
@@ -67,7 +66,7 @@ public class AdminController {
     }
 
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register")
     public ResponseEntity<String> registerAdmin(@RequestBody UsersDto request) {
         if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -87,11 +86,11 @@ public class AdminController {
 
         usersRepository.save(newAdmin);
 
-        return ResponseEntity.ok("Admin registered successfully");
+        return ResponseEntity.ok("Admin added successfully.");
     }
 
-    @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/users")
     public ResponseEntity<List<UsersDto>> getAllUsers() {
         List<UsersDto> userDtos = usersRepository.findAll().stream()
                 .map(user -> {
@@ -101,8 +100,7 @@ public class AdminController {
                                     task.getDescription(),
                                     task.getImportant(),
                                     task.getStatus(),
-                                    task.getTitle(),
-                                    null // gerekirse kullanıcı emaili veya başka info ekleyebilirsin
+                                    task.getTitle()
                             ))
                             .collect(Collectors.toList());
 
@@ -119,6 +117,5 @@ public class AdminController {
 
         return ResponseEntity.ok(userDtos);
     }
-
-}
+    }
 

@@ -6,22 +6,17 @@ import com.haratres.todo.entity.Users;
 import com.haratres.todo.repository.UsersRepository;
 import com.haratres.todo.services.task.TasksService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserUtil {
 
-    private final TokenProvider tokenProvider;
-    private final UsersRepository usersRepository;
-    private final TasksService tasksService;
-    TasksDto tasksDTO;
+    @Autowired
+    TokenProvider tokenProvider;
 
-    public UserUtil(UsersRepository usersRepository, TokenProvider tokenProvider, TasksService tasksService) {
-        this.usersRepository = usersRepository;
-        this.tokenProvider = tokenProvider;
-        this.tasksService = tasksService;
-    }
-
+    @Autowired
+    UsersRepository usersRepository;
 
     public Users tokenProcess(HttpServletRequest request) {
         String token = tokenProvider.resolveToken(request);
@@ -29,20 +24,12 @@ public class UserUtil {
             throw new RuntimeException("Invalid token");
         }
 
-        // Token'dan email çıkar
         String email = tokenProvider.getEmailFromToken(token);
 
-        // Email'e göre kullanıcıyı bul
         Users user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
         return user;
     }
-
-    
-
 
 }
 

@@ -1,23 +1,26 @@
 package com.haratres.todo.controller;
 
 import com.haratres.todo.config.TokenProvider;
+import com.haratres.todo.config.Validationhandler;
 import com.haratres.todo.dto.AuthTokenDto;
 import com.haratres.todo.dto.UsersDto;
 import com.haratres.todo.entity.Users;
 import com.haratres.todo.repository.UsersRepository;
 import com.haratres.todo.services.user.UsersService;
+import com.haratres.todo.validators.UsersValidators;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 @RestController
 @RequestMapping("/user")
 public class UsersController {
@@ -29,17 +32,25 @@ public class UsersController {
     private TokenProvider jwtTokenUtil;
 
     @Autowired
-    private UsersRepository usersRepository;
-
-    @Autowired
     private UsersService usersService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PreAuthorize("permitAll()")
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ResponseEntity<?> generateToken(@RequestBody UsersDto loginUser) throws AuthenticationException {
+    @Autowired
+    private UsersValidators usersValidators;
+
+    @Autowired
+    private Validationhandler validationhandler;
+
+    @Autowired
+    private UsersRepository usersRepository;
+
+
+
+    @PermitAll
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UsersDto loginUser) throws AuthenticationException {
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -48,19 +59,19 @@ public class UsersController {
                 )
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtTokenUtil.createToken(authentication);
+        final String token = jwtTokenUtil.createToken(authentication);
         return ResponseEntity.ok(new AuthTokenDto(token));
     }
 
-    @PreAuthorize("permitAll()")
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UsersDto usersDto) {
-        if (usersDto.getEmail() == null || usersDto.getPassword() == null) {
-            return ResponseEntity.badRequest().body("Email and password cannot be empty");
-        }
 
-        if (usersRepository.findByEmail(usersDto.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email is already taken");
+    @PermitAll
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody UsersDto usersDto, Errors errors) {
+
+        usersValidators.validate(usersDto, errors);
+
+        if (errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(validationhandler.validate(errors));
         }
 
         Users user = new Users();
@@ -75,12 +86,6 @@ public class UsersController {
         return ResponseEntity.ok(savedUser);
     }
 
-
-    @PreAuthorize("hasRole('USER')")
-    @RequestMapping(value="/userping", method = RequestMethod.GET)
-    public String userPing(){
-        return "Any User Can Read This";
-    }
 
 
 }
