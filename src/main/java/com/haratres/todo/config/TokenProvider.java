@@ -1,7 +1,6 @@
 package com.haratres.todo.config;
 
 import io.jsonwebtoken.*;
-import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -51,7 +50,7 @@ public class TokenProvider {
         if(bearerToken!=null && bearerToken.startsWith("Bearer ")){
             return bearerToken.substring(7);
         }
-    log.warn("Authorization header bulunamadı veya 'Bearer ' ile başlamıyor.");
+    log.warn("Authorization didn't found or doesn't start with 'Bearer '");
     return null;
     }
 
@@ -79,10 +78,6 @@ public class TokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
         String authoritiesClaim = (String) claims.get(AUTHORITIES_KEY);
-
-        if (StringUtils.isBlank(authoritiesClaim)) {
-            authoritiesClaim = "ROLE_USER";
-        }
 
         List<GrantedAuthority> authorities = Arrays.stream(authoritiesClaim.split(","))
                 .map(String::trim)

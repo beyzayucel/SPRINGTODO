@@ -16,16 +16,15 @@ public class Otp {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "new_password")
-    private String newPassword;
+    @Column(name = "verified")
+    private boolean verified;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Users users;
+    @Column(name = "users_id")
+    private String userId;
 
-    public Otp(String email,Users users,String otp) {
+    public Otp(String email,String userId,String otp) {
         this.email=email;
-        this.users=users;
+        this.userId=userId;
         this.otp=otp;
     }
 
@@ -48,8 +47,12 @@ public class Otp {
         this.otp = otp;
     }
 
-    public Users getUsers() {
-        return users;
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getEmail() {
@@ -60,15 +63,13 @@ public class Otp {
         this.email = email;
     }
 
-    public String getNewPassword() {
-        return newPassword;
+    public boolean isVerified() {
+        return verified;
     }
 
-    public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
+    public void setVerified(boolean verified) {
+        this.verified = verified;
     }
 
-    public void setUsers(Users users) {
-        this.users = users;
-    }
+
 }

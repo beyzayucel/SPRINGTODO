@@ -1,13 +1,15 @@
 package com.haratres.todo.dto;
 
-public class RequestDto {
+public class ForgottenPasswordOtpDto {
     private String newPassword;
+    private String newPasswordAgain;
     private String otp;
     private String email;
 
-    public RequestDto(String newPassword, String otp) {
+    public ForgottenPasswordOtpDto(String newPassword, String newPasswordAgain,String email) {
         this.newPassword = newPassword;
-        this.otp = otp;
+        this.newPasswordAgain = newPasswordAgain;
+        this.email=email;
     }
 
     public String getEmail() {
@@ -28,6 +30,14 @@ public class RequestDto {
 
     public String getOtp() {
         return otp;
+    }
+
+    public String getNewPasswordAgain() {
+        return newPasswordAgain;
+    }
+
+    public void setNewPasswordAgain(String newPasswordAgain) {
+        this.newPasswordAgain = newPasswordAgain;
     }
 
     public void setOtp(String otp) {

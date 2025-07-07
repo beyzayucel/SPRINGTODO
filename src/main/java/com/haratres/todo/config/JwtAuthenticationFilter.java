@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,25 +23,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Autowired
-    private TokenProvider jwtTokenUtil;
+    private TokenProvider tokenProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         String email = null;
-        String authToken = jwtTokenUtil.resolveToken(req);
+        String authToken = tokenProvider.resolveToken(req);
 
         if(!StringUtils.isBlank(authToken)){
-            email = jwtTokenUtil.getEmailFromToken(authToken);}
+            email = tokenProvider.getEmailFromToken(authToken);}
         else{
             System.out.println("Authentication failed. Email or password is invalid.");}
 
-
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-            if (jwtTokenUtil.validateToken(authToken)) {
+            if (tokenProvider.validateToken(authToken)) {
                 UsernamePasswordAuthenticationToken authentication =
-                        jwtTokenUtil.getAuthenticationToken(authToken, userDetails);
+                        tokenProvider.getAuthenticationToken(authToken, userDetails);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }

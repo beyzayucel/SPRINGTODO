@@ -45,25 +45,25 @@ public class TasksServiceImpl implements TasksService {
     }
 
 
-    public Tasks updateTasks(int id, TasksDto tasksDTO, Users user) {
+    public Tasks updateTasks(int id, TasksDto newTask, Users user) {
         List<Tasks> tasksList = user.getTasks();
 
-        Tasks targetTask = tasksList.stream()
+        Tasks updateTask = tasksList.stream()
                 .filter(task -> task.getId() == id)
                 .findFirst()
                 .orElse(null);
 
 
-        if (!targetTask.equals(null)) {
-            if (targetTask.getStatus().equals(TasksStatus.CREATED)) {
-                targetTask.setStatus(TasksStatus.IN_PROGRESS);
+        if (!updateTask.equals(null)) {
+            if (updateTask.getStatus().equals(TasksStatus.CREATED)) {
+                updateTask.setStatus(TasksStatus.IN_PROGRESS);
             }
-            targetTask.setTitle(tasksDTO.getTitle());
-            targetTask.setDescription(tasksDTO.getDescription());
-            targetTask.setImportant(tasksDTO.getImportant());
-            targetTask.setCreatedDate(tasksDTO.getCreatedDate());
+            updateTask.setTitle(newTask.getTitle());
+            updateTask.setDescription(newTask.getDescription());
+            updateTask.setImportant(newTask.getImportant());
+            updateTask.setCreatedDate(newTask.getCreatedDate());
 
-            return tasksRepository.save(targetTask);
+            return tasksRepository.save(updateTask);
         }
         return null;
     }
@@ -72,12 +72,12 @@ public class TasksServiceImpl implements TasksService {
 
         List<Tasks> tasksList = user.getTasks();
 
-        Tasks targetTask = tasksList.stream()
+        Tasks deleteTask = tasksList.stream()
                 .filter(task -> task.getId() == id)
                 .findFirst()
                 .orElse(null);
 
-        if (targetTask.equals(null)) {
+        if (deleteTask.equals(null)) {
             return false;
         }
         tasksRepository.deleteById(id);
@@ -87,16 +87,16 @@ public class TasksServiceImpl implements TasksService {
     public Tasks getTasksTitle(String title, Users users) {
         List<Tasks> tasksList = users.getTasks();
 
-        Tasks targetTask = tasksList.stream()
+        Tasks getTask = tasksList.stream()
                 .filter(task -> task.getTitle().equalsIgnoreCase(title))
                 .findFirst()
                 .orElse(null);
 
-        if (targetTask.equals(null)) {
+        if (getTask.equals(null)) {
             throw new RuntimeException(title + " not found.");
         }
 
-        return targetTask;
+        return getTask;
     }
 
     public List<Tasks> getStatus(TasksStatus tasksStatus, Users users) {

@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface OtpRepository extends JpaRepository<Otp,Integer> {
-    Otp findByEmail(String email);
     Otp findTopByEmailOrderByIdDesc(String email);
+    Otp getOtpByUserId(String id);
 }

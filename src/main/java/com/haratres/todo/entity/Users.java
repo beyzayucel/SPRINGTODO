@@ -47,27 +47,14 @@ public class Users {
     @JsonManagedReference("user-role")
     private Set<Roles> roles;
 
-    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Otp> otps = new ArrayList<>();
 
 
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
     private List<Tasks> tasks;
 
-
-
-    public void addTasks(Tasks theTasks){
-        if(tasks==null){
-            tasks=new ArrayList<>();
-        }
-        tasks.add(theTasks);
-    }
-
     public Tasks getTasks(int id) {
         return tasks.get(id);
     }
-
-
 
     public Users() {
     }
@@ -94,12 +81,7 @@ public class Users {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
+
     public String getLastName() {
         return lastName;
     }
@@ -132,6 +114,14 @@ public class Users {
 
     public void setRoles(Set<Roles> roles) {
         this.roles = roles;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override
