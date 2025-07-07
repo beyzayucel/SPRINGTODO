@@ -4,6 +4,7 @@ import com.haratres.todo.config.Validationhandler;
 import com.haratres.todo.dto.TasksDto;
 import com.haratres.todo.entity.Tasks;
 import com.haratres.todo.entity.Users;
+import com.haratres.todo.enums.TasksStatus;
 import com.haratres.todo.services.task.TasksService;
 import com.haratres.todo.util.UserUtil;
 import com.haratres.todo.validators.TasksValidators;
@@ -44,7 +45,7 @@ public class TasksController extends BaseController{
         Users users=userUtil.tokenProcess(request);
 
         Tasks task1=tasksService.createTasks(tasksDTO, users);
-        TasksDto tasksDto=modelMapper.map(task1,TasksDto.class);
+        TasksDto tasksDto=modelMapper().map(task1,TasksDto.class);
 
         return ResponseEntity.ok(tasksDto);
     }
@@ -56,7 +57,7 @@ public class TasksController extends BaseController{
         Users users=userUtil.tokenProcess(request);
         List<Tasks> tasksList=tasksService.getTasksForUser(users);
 
-        return tasksList.stream().map(tasks -> modelMapper.map(tasks,TasksDto.class)).collect(Collectors.toList());
+        return tasksList.stream().map(tasks -> modelMapper().map(tasks,TasksDto.class)).collect(Collectors.toList());
     }
 
     @PreAuthorize("hasRole('USER')")
@@ -84,7 +85,7 @@ public class TasksController extends BaseController{
         Users users=userUtil.tokenProcess(request);
 
         Tasks tasksTitle=tasksService.getTasksTitle(title,users);
-        return modelMapper.map(tasksTitle,TasksDto.class);
+        return modelMapper().map(tasksTitle,TasksDto.class);
     }
 
     @PreAuthorize("hasRole('USER')")
@@ -93,7 +94,7 @@ public class TasksController extends BaseController{
         Users users=userUtil.tokenProcess(request);
 
         List<Tasks> tasksTitle=tasksService.getStatus(status,users);
-        return tasksTitle.stream().map(task -> modelMapper.map(task,TasksDto.class)).collect(Collectors.toList());
+        return tasksTitle.stream().map(task -> modelMapper().map(task,TasksDto.class)).collect(Collectors.toList());
     }
 
     @PreAuthorize("hasRole('USER')")
@@ -103,8 +104,9 @@ public class TasksController extends BaseController{
 
         List<Tasks> tasks=tasksService.sortForDate(users);
 
-        return tasks.stream().map(task -> modelMapper.map(task,TasksDto.class)).collect(Collectors.toList());
+        return tasks.stream().map(task -> modelMapper().map(task,TasksDto.class)).collect(Collectors.toList());
 
 
     }
+
 }

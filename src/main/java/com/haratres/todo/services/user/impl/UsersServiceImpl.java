@@ -10,9 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.userdetails.User;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,9 +28,8 @@ public class UsersServiceImpl implements UsersService, UserDetailsService {
 
     @Override
     public Users saveUsers(Users users) {
-        if (users.getRoles() == null || users.getRoles().isEmpty()) {
-            Roles defaultRole = rolesRepository.findByName("ROLE_USER")
-                    .orElseThrow(() -> new RuntimeException("ROLE_USER role not found in DB"));
+        if (users.getRoles()==null) {
+            Roles defaultRole = rolesRepository.findByName("ROLE_USER").get();
             users.setRoles(Set.of(defaultRole));
         }
         return usersRepository.save(users);
@@ -39,18 +37,18 @@ public class UsersServiceImpl implements UsersService, UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Users user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+    public UserDetails loadUserByUsername(String email) {
+        Users users = usersRepository.findByEmail(email).get();
 
-        var authorities = user.getRoles().stream()
+        var authorities = users.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
+        return new User(
+                users.getEmail(),
+                users.getPassword(),
                 authorities);
     }
+
 
 }
