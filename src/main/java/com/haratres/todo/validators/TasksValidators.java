@@ -1,5 +1,4 @@
 package com.haratres.todo.validators;
-
 import com.haratres.todo.dto.TasksDto;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.stereotype.Component;
@@ -22,19 +21,16 @@ public class TasksValidators implements Validator {
         TasksDto tasksDto=(TasksDto) target;
 
         if(StringUtils.isBlank(tasksDto.getTitle())){
-            errors.reject("title","The title field cannot be empty.");
+            errors.rejectValue("title","title.is.empty.error","The title field cannot be empty.");
         }
-        if(StringUtils.isBlank(tasksDto.getImportant())){
-            errors.reject("important","The task importance field cannot be blank.");
+        else if(StringUtils.isBlank(tasksDto.getImportant())){
+            errors.rejectValue("important","important.is.empty.error","The task importance field cannot be blank.");
         }
         else if(!tasksDto.getImportant().matches(importantRegex)){
-            errors.reject("important","The task importance field can only contain letters.");
+            errors.rejectValue("important","important.is.wrong.format.error","The task importance field can only contain letters.");
         }
-        if(!tasksDto.getCreatedDate().matches(dateRegex)){
-            errors.reject("createdDate","The date field was entered in the wrong format.");
-
+        else if(!tasksDto.getCreatedDate().matches(dateRegex)){
+            errors.rejectValue("createdDate","createdDate.is.wrong.format.error","The date field was entered in the wrong format.");
         }
-
-
     }
 }

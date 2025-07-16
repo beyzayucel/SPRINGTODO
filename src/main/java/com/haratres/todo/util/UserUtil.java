@@ -1,12 +1,11 @@
 package com.haratres.todo.util;
 
-import com.haratres.todo.config.TokenProvider;
-import com.haratres.todo.dto.TasksDto;
+import com.haratres.todo.security.TokenProvider;
 import com.haratres.todo.entity.Users;
 import com.haratres.todo.repository.UsersRepository;
-import com.haratres.todo.services.task.TasksService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,11 +22,8 @@ public class UserUtil {
         if (token == null || !tokenProvider.validateToken(token)) {
             throw new RuntimeException("Invalid token");
         }
-
         String email = tokenProvider.getEmailFromToken(token);
-
-        Users user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        Users user = usersRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return user;
     }
 

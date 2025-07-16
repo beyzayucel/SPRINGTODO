@@ -1,12 +1,7 @@
 package com.haratres.todo.dto;
 
-
 import com.haratres.todo.entity.Tasks;
 import com.haratres.todo.enums.TasksStatus;
-
-import java.time.LocalDate;
-
-
 
 public class TasksDto {
     private String title;
