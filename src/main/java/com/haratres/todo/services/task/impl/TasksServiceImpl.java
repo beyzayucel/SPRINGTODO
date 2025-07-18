@@ -15,13 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
 @Transactional
 @Service
-public class TasksServiceImpl extends BaseController implements TasksService {
+public class TasksServiceImpl extends BaseController implements TasksService{
 
     @Autowired
     TasksRepository tasksRepository;
@@ -53,7 +52,7 @@ public class TasksServiceImpl extends BaseController implements TasksService {
     }
 
     public Tasks updateTasks(int id, TasksDto newTask, Users user) {
-        Tasks updateTask = tasksRepository.getById(id);
+        Tasks updateTask=tasksRepository.getTasksById(id,user);
         if (!updateTask.equals(null)) {
             if (updateTask.getStatus().equals(TasksStatus.CREATED)) {
                 updateTask.setStatus(TasksStatus.IN_PROGRESS);
@@ -68,9 +67,8 @@ public class TasksServiceImpl extends BaseController implements TasksService {
     }
 
     public Boolean deleteTasks(int id, Users user) {
-        List<Tasks> tasksList = user.getTasks();
-        Tasks deleteTask = tasksList.stream().filter(task -> task.getId() == id).findFirst().get();
-        if (deleteTask == null) {
+        Tasks deleteTask=tasksRepository.getTasksById(id,user);
+        if (deleteTask.equals(null)) {
             return false;
         }
         tasksRepository.delete(deleteTask);
@@ -78,8 +76,7 @@ public class TasksServiceImpl extends BaseController implements TasksService {
     }
 
     public Tasks getTasksTitle(String title, Users users) {
-        List<Tasks> tasksList = users.getTasks();
-        Tasks getTask = tasksList.stream().filter(task -> task.getTitle().equalsIgnoreCase(title)).findFirst().orElse(null);
+        Tasks getTask=tasksRepository.getTasksByTitle(title,users);
         if (getTask.equals(null)) {
             throw new RuntimeException(title + " not found.");
         }
@@ -95,11 +92,10 @@ public class TasksServiceImpl extends BaseController implements TasksService {
     }
 
     public Tasks getTaskById(int id, Users users) {
-        List<Tasks> tasksList = users.getTasks();
-        Optional<Tasks> getOneTasks = tasksList.stream().filter(task -> task.getId() == id).findFirst();
-        if (getOneTasks.isEmpty()) {
+        Tasks getOneTasks=tasksRepository.getTasksById(id,users);
+        if (getOneTasks==null) {
             throw new RuntimeException(id + " not found.");
         }
-        return getOneTasks.get();
+        return getOneTasks;
     }
 }

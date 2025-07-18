@@ -47,19 +47,19 @@ public class UsersServiceImpl implements UsersService, UserDetailsService {
     @Override
     public Users updateUser(Users newUser, String email) {
         Users updateUser = usersRepository.findByEmail(email).orElseThrow();
-        if (!newUser.getEmail().isBlank()) {
+        if (newUser.getEmail()!=null) {
             updateUser.setEmail(newUser.getEmail());
         }
-        if (!newUser.getTel().isBlank()) {
+        if (newUser.getTel()!=null) {
             updateUser.setTel(newUser.getTel());
         }
-        if (!newUser.getFirstName().isBlank()) {
+        if (newUser.getFirstName()!=null) {
             updateUser.setFirstName(newUser.getFirstName());
         }
-        if (!newUser.getLastName().isBlank()) {
+        if (newUser.getLastName()!=null) {
             updateUser.setLastName(newUser.getLastName());
         }
-        if (!(newUser.getPassword().isBlank()) && !newUser.getPassword().isBlank()) {
+        if (newUser.getPassword()!=null && !newUser.getPassword().isBlank()) {
             updateUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         }
         return usersRepository.save(updateUser);

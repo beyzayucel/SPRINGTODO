@@ -48,8 +48,7 @@ public class TasksController extends BaseController{
     @GetMapping("/list")
     public TasksWithMotivationDto list(HttpServletRequest request){
         Users users=userUtil.tokenProcess(request);
-        TasksWithMotivationDto tasksList=tasksService.getTasksForUser(users);
-        return tasksList;
+        return tasksService.getTasksForUser(users);
     }
 
     @PreAuthorize("hasRole('USER')")

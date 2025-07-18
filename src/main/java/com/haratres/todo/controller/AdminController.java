@@ -69,9 +69,9 @@ public class AdminController extends BaseController {
         List<AdminGetUsersDto> adminGetUsersDtoList = new ArrayList<>();
         for (Users user : users) {
             List<Tasks> tasksList = user.getTasks();
-            List<TasksDto> tasksDto = tasksList.stream().map(t -> modelMapper().map(t, TasksDto.class)).collect(Collectors.toList());
+            List<TasksDto> tasksDto = tasksList.stream().map(task -> modelMapper().map(task, TasksDto.class)).collect(Collectors.toList());
             List<UserImage> userImages = user.getUserImages();
-            List<ImageDto> imageDto = userImages.stream().map(s -> modelMapper().map(s, ImageDto.class)).collect(Collectors.toList());
+            List<ImageDto> imageDto = userImages.stream().map(image -> modelMapper().map(image, ImageDto.class)).collect(Collectors.toList());
             AdminGetUsersDto adminDto = new AdminGetUsersDto(user.getEmail(), user.getFirstName(), user.getLastName(), tasksDto, user.getTel(), imageDto);
             adminGetUsersDtoList.add(adminDto);
         }

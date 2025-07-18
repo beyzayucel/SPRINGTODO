@@ -9,7 +9,6 @@ import com.haratres.todo.enums.TasksStatus;
 import java.util.List;
 
 public interface TasksService {
-
     Tasks createTasks(TasksDto tasksDTO, Users user);
     TasksWithMotivationDto getTasksForUser(Users users);
     Tasks updateTasks(int id, TasksDto tasksDTO,Users users);
@@ -18,6 +17,4 @@ public interface TasksService {
     List<Tasks> getStatus(TasksStatus tasksStatus,Users users);
     List<Tasks> sortForDate(Users users);
     Tasks getTaskById(int id,Users users);
-
-
     }

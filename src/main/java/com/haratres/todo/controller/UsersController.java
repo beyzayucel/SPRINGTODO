@@ -85,9 +85,8 @@ public class UsersController extends BaseController {
     public ResponseEntity<Users> updateUser(@RequestBody UsersDto usersDto, HttpServletRequest request) {
         validate(usersDto,"user",userUpdateValidator);
         Users users=userUtil.tokenProcess(request);
-        String email=users.getEmail();
         Users user = modelMapper().map(usersDto, Users.class);
-        usersService.updateUser(user,email);
+        usersService.updateUser(user,users.getEmail());
         return ResponseEntity.ok().build();
     }
 

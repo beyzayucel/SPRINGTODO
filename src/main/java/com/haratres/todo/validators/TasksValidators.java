@@ -23,13 +23,13 @@ public class TasksValidators implements Validator {
         if(StringUtils.isBlank(tasksDto.getTitle())){
             errors.rejectValue("title","title.is.empty.error","The title field cannot be empty.");
         }
-        else if(StringUtils.isBlank(tasksDto.getImportant())){
+        if(StringUtils.isBlank(tasksDto.getImportant())){
             errors.rejectValue("important","important.is.empty.error","The task importance field cannot be blank.");
         }
-        else if(!tasksDto.getImportant().matches(importantRegex)){
+        if(!tasksDto.getImportant().matches(importantRegex)){
             errors.rejectValue("important","important.is.wrong.format.error","The task importance field can only contain letters.");
         }
-        else if(!tasksDto.getCreatedDate().matches(dateRegex)){
+        if(!tasksDto.getCreatedDate().matches(dateRegex)){
             errors.rejectValue("createdDate","createdDate.is.wrong.format.error","The date field was entered in the wrong format.");
         }
     }
