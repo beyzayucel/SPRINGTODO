@@ -1,33 +1,58 @@
-#  ToDo List Uygulaması
+#  ToDo List Projesi
 
-Kullanıcıların kişisel görevlerini (ToDo) yönetebileceği, kimlik doğrulama ve yetkilendirme destekli bir web uygulamasıdır.
+Bu uygulama, kullanıcıların kendi görevlerini kolayca yönetebileceği, kimlik doğrulama ve yetkilendirme özelliklerine sahip bir web platformudur. Her kullanıcı yalnızca kendi görevlerine erişebilir; görevlerini ekleyebilir, güncelleyebilir veya silebilir. Uygulamanın sunduğu ekstra özellikler sayesinde kullanıcılar, görev listelerini oluştururken motivasyonlarını artırmak için rastgele motivasyon sözleri alabilir ve uygulamaya kendi görsellerini ekleyerek kişiselleştirebilirler.
 
 ---
 
 ##  Kullanılan Teknolojiler
 
-| Katman       | Teknoloji           |
-|--------------|---------------------|
-| Backend      | Java 17 - Spring Boot 2.0.0 |
-| Veritabanı   | MySQL |
-| Framework    | Spring MVC, Spring Security, Spring Data JPA |
-| Diğer        | JWT, Maven, Cloudinary (resim için), Bean Validation |
+| Katman       | Teknoloji                                                    |
+|--------------|--------------------------------------------------------------|
+| Backend      | Java 21 - Spring Boot 2.0.0                                  |
+| Veritabanı   | MySQL                                                        |
+| Framework    | Spring MVC, Spring Security, Spring Data JPA                 |
+| Diğer        | JWT, Maven, Cloudinary (profil resmi için), Bean Validation  |
+| Entegrasyon  | ZenQuotes API (motivasyon sözleri için dış API entegrasyonu) |
 
 ---
 
 ##  Projeyi Çalıştırma
 ### 1. Projeyi klonla
-     git clone https://github.com/kullanici-adi/proje-adi.git
-     cd proje-adi
+     git clone https://github.com/beyzayucel/SPRINGTODO.git
+     cd SPRINGTODO
 
 ### 2. Maven bağımlılıklarını indir (IDE bunu otomatik yapabilir)
     ./mvnw clean install
 
 ### 3. Uygulamayı başlat
-    ./mvnw spring-boot:run
+      #Windows
+     ./mvnw spring-boot:run
+
+     #macOS
+     chmod +x mvnw
+     ./mvnw spring-boot:run
 
 ### 4. application.properties Ayarları
 ![Ekran Resmi 2025-07-18 10.05.49.png](images/Ekran%20Resmi%202025-07-18%2010.05.49.png)
+
+    spring.datasource.url=jdbc:mysql://localhost:3306/todo
+    spring.datasource.username= #veritabani_adi
+    spring.datasource.password= #veritabani_sifresi
+    spring.jpa.hibernate.ddl-auto=update
+    jwt.token.validity=18000
+    jwt.signing.key=signingkey
+    jwt.authorities.key=roles
+    jwt.token.prefix=Bearer
+    jwt.header.string=Authorization
+
+    spring.mail.host=smtp.gmail.com
+    spring.mail.port=587
+    spring.mail.username= #gmail_adresi
+    spring.mail.password= #gmail_uygulama_sifresi
+    spring.mail.properties.mail.smtp.auth=true
+    spring.mail.properties.mail.smtp.starttls.enable=true
+
+    spring.messages.basename=messages
 
 
 ##  API Endpointleri
