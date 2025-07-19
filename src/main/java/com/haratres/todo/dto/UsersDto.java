@@ -11,18 +11,28 @@ public class UsersDto {
     private List<TasksDto> tasks;
     private String password;
     private String tel;
+    private List<ImageDto> userImages;
 
 
-    public UsersDto(String password,String email, String firstName, String lastName,List<TasksDto> tasks,String tel) {
+    public UsersDto(String email, String firstName, List<ImageDto> userImages, String lastName, String password, List<TasksDto> tasks, String tel) {
         this.email = email;
         this.firstName = firstName;
+        this.userImages = userImages;
         this.lastName = lastName;
+        this.password = password;
         this.tasks = tasks;
-        this.password=password;
-        this.tel=tel;
+        this.tel = tel;
     }
 
     public UsersDto() {
+    }
+
+    public List<ImageDto> getUserImages() {
+        return userImages;
+    }
+
+    public void setUserImages(List<ImageDto> userImages) {
+        this.userImages = userImages;
     }
 
     public String getPassword() {

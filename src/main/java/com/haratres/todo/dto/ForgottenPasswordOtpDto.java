@@ -12,6 +12,9 @@ public class ForgottenPasswordOtpDto {
         this.email=email;
     }
 
+    public ForgottenPasswordOtpDto() {
+    }
+
     public String getEmail() {
         return email;
     }

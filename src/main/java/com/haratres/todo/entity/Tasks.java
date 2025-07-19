@@ -3,9 +3,6 @@ package com.haratres.todo.entity;
 import com.haratres.todo.enums.TasksStatus;
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "tasks")

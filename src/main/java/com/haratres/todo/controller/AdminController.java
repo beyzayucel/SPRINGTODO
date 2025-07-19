@@ -1,118 +1,80 @@
 package com.haratres.todo.controller;
 
-import com.haratres.todo.config.TokenProvider;
-import com.haratres.todo.dto.TasksDto;
-import com.haratres.todo.dto.UsersDto;
-import com.haratres.todo.entity.Roles;
+import com.haratres.todo.dto.*;
+import com.haratres.todo.entity.Tasks;
+import com.haratres.todo.entity.UserImage;
 import com.haratres.todo.entity.Users;
-import com.haratres.todo.repository.RolesRepository;
 import com.haratres.todo.repository.UsersRepository;
+import com.haratres.todo.security.TokenProvider;
+import com.haratres.todo.services.admin.AdminService;
+import com.haratres.todo.validators.LoginValidators;
+import com.haratres.todo.validators.UsersValidators;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
 
 @RestController
 @RequestMapping("/admin")
-public class AdminController {
+public class AdminController extends BaseController {
+
+    @Autowired
+    AdminService adminService;
+
+    @Autowired
+    LoginValidators loginValidators;
 
     @Autowired
     UsersRepository usersRepository;
 
     @Autowired
-    RolesRepository rolesRepository;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    UsersValidators usersValidators;
 
     @Autowired
     TokenProvider tokenProvider;
 
+    @Autowired
+    AuthenticationManager authenticationManager;
+
     @PermitAll
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UsersDto loginUserDto) {
-        Users user = usersRepository.findByEmail(loginUserDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("User didn't find."));
-
-        if (!passwordEncoder.matches(loginUserDto.getPassword(), user.getPassword())) {
-            return ResponseEntity.badRequest().body("Wrong password.");
-        }
-
-        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user.getEmail(),
-                null,
-                authorities
-        );
-
+    public ResponseEntity<AuthTokenDto> login(@RequestBody UsersDto usersDto) {
+        validate(usersDto, "user", loginValidators);
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(usersDto.getEmail(), usersDto.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = tokenProvider.createToken(authentication);
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(new AuthTokenDto(token));
     }
-
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register")
-    public ResponseEntity<String> registerAdmin(@RequestBody UsersDto request) {
-        if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
-        }
-
-        Roles adminRole = rolesRepository.findByName("ROLE_ADMIN")
-                .orElseGet(() -> rolesRepository.save(new Roles("ROLE_ADMIN")));
-
-        Users newAdmin = new Users();
-        newAdmin.setEmail(request.getEmail());
-        newAdmin.setPassword(passwordEncoder.encode(request.getPassword()));
-        newAdmin.setLastName(request.getLastName());
-        newAdmin.setFirstName(request.getFirstName());
-        newAdmin.setTel(request.getTel());
-        newAdmin.setRoles(Set.of(adminRole));
-
-        usersRepository.save(newAdmin);
-
-        return ResponseEntity.ok("Admin added successfully.");
+    public ResponseEntity<?> registerAdmin(@RequestBody UsersDto usersDto) {
+        validate(usersDto, "user", usersValidators);
+        return adminService.registerAdmin(usersDto);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
-    public ResponseEntity<List<UsersDto>> getAllUsers() {
-        List<UsersDto> userDtos = usersRepository.findAll().stream()
-                .map(user -> {
-                    List<TasksDto> taskDtos = user.getTasks().stream()
-                            .map(task -> new TasksDto(
-                                    task.getCreatedDate(),
-                                    task.getDescription(),
-                                    task.getImportant(),
-                                    task.getStatus(),
-                                    task.getTitle()
-                            ))
-                            .collect(Collectors.toList());
-
-                    return new UsersDto(
-                            user.getPassword(),
-                            user.getEmail(),
-                            user.getFirstName(),
-                            user.getLastName(),
-                            taskDtos,
-                            user.getTel()
-                    );
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(userDtos);
+    public ResponseEntity<List<AdminGetUsersDto>> getAllUsers() {
+        List<Users> users = usersRepository.findByRoles_Name("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER didn't find"));
+        List<AdminGetUsersDto> adminGetUsersDtoList = new ArrayList<>();
+        for (Users user : users) {
+            List<Tasks> tasksList = user.getTasks();
+            List<TasksDto> tasksDto = tasksList.stream().map(task -> modelMapper().map(task, TasksDto.class)).collect(Collectors.toList());
+            List<UserImage> userImages = user.getUserImages();
+            List<ImageDto> imageDto = userImages.stream().map(image -> modelMapper().map(image, ImageDto.class)).collect(Collectors.toList());
+            AdminGetUsersDto adminDto = new AdminGetUsersDto(user.getEmail(), user.getFirstName(), user.getLastName(), tasksDto, user.getTel(), imageDto);
+            adminGetUsersDtoList.add(adminDto);
+        }
+        return ResponseEntity.ok(adminGetUsersDtoList);
     }
-    }
-
+}

@@ -1,10 +1,14 @@
 package com.haratres.todo.services.task.impl;
 
+import com.haratres.todo.controller.BaseController;
+import com.haratres.todo.dto.MotivationDto;
 import com.haratres.todo.dto.TasksDto;
+import com.haratres.todo.dto.TasksWithMotivationDto;
 import com.haratres.todo.entity.Tasks;
 import com.haratres.todo.entity.Users;
 import com.haratres.todo.enums.TasksStatus;
 import com.haratres.todo.repository.TasksRepository;
+import com.haratres.todo.services.motivation.MotivationService;
 import com.haratres.todo.services.task.TasksService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,44 +20,39 @@ import java.util.stream.Collectors;
 
 @Transactional
 @Service
-public class TasksServiceImpl implements TasksService {
+public class TasksServiceImpl extends BaseController implements TasksService{
 
     @Autowired
     TasksRepository tasksRepository;
 
+    @Autowired
+    MotivationService motivationService;
 
     @Override
-    public Tasks createTasks(TasksDto tasksDTO, Users users) {
+    public Tasks createTasks(TasksDto tasksDTO, Users user) {
         Tasks task = new Tasks();
         task.setTitle(tasksDTO.getTitle());
         task.setDescription(tasksDTO.getDescription());
         task.setStatus(TasksStatus.CREATED);
         task.setImportant(tasksDTO.getImportant());
         task.setCreatedDate(tasksDTO.getCreatedDate());
-        task.setUsers(users);
-
+        task.setUsers(user);
         task = tasksRepository.save(task);
-
         return task;
     }
 
-
-
-    public List<Tasks> getTasksForUser(Users users) {
+    public TasksWithMotivationDto getTasksForUser(Users users) {
         List<Tasks> tasks = users.getTasks();
-        return tasks.stream().collect(Collectors.toList());
+        List<TasksDto> tasksDto = tasks.stream().map(task -> modelMapper().map(task, TasksDto.class)).collect(Collectors.toList());
+        MotivationDto motivationDto = motivationService.getMotivation();
+        TasksWithMotivationDto tasksMotivationDto = new TasksWithMotivationDto();
+        tasksMotivationDto.setMotivationDto(motivationDto);
+        tasksMotivationDto.setTasks(tasksDto);
+        return tasksMotivationDto;
     }
 
-
     public Tasks updateTasks(int id, TasksDto newTask, Users user) {
-        List<Tasks> tasksList = user.getTasks();
-
-        Tasks updateTask = tasksList.stream()
-                .filter(task -> task.getId() == id)
-                .findFirst()
-                .orElse(null);
-
-
+        Tasks updateTask=tasksRepository.getTasksById(id,user);
         if (!updateTask.equals(null)) {
             if (updateTask.getStatus().equals(TasksStatus.CREATED)) {
                 updateTask.setStatus(TasksStatus.IN_PROGRESS);
@@ -62,40 +61,25 @@ public class TasksServiceImpl implements TasksService {
             updateTask.setDescription(newTask.getDescription());
             updateTask.setImportant(newTask.getImportant());
             updateTask.setCreatedDate(newTask.getCreatedDate());
-
             return tasksRepository.save(updateTask);
         }
         return null;
     }
 
     public Boolean deleteTasks(int id, Users user) {
-
-        List<Tasks> tasksList = user.getTasks();
-
-        Tasks deleteTask = tasksList.stream()
-                .filter(task -> task.getId() == id)
-                .findFirst()
-                .orElse(null);
-
+        Tasks deleteTask=tasksRepository.getTasksById(id,user);
         if (deleteTask.equals(null)) {
             return false;
         }
-        tasksRepository.deleteById(id);
+        tasksRepository.delete(deleteTask);
         return true;
     }
 
     public Tasks getTasksTitle(String title, Users users) {
-        List<Tasks> tasksList = users.getTasks();
-
-        Tasks getTask = tasksList.stream()
-                .filter(task -> task.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
-
+        Tasks getTask=tasksRepository.getTasksByTitle(title,users);
         if (getTask.equals(null)) {
             throw new RuntimeException(title + " not found.");
         }
-
         return getTask;
     }
 
@@ -107,4 +91,11 @@ public class TasksServiceImpl implements TasksService {
         return tasksRepository.sortByDate(users);
     }
 
+    public Tasks getTaskById(int id, Users users) {
+        Tasks getOneTasks=tasksRepository.getTasksById(id,users);
+        if (getOneTasks==null) {
+            throw new RuntimeException(id + " not found.");
+        }
+        return getOneTasks;
+    }
 }

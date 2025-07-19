@@ -1,114 +1,51 @@
 package com.haratres.todo.controller;
-
-import com.haratres.todo.config.Validationhandler;
 import com.haratres.todo.dto.ForgottenPasswordOtpDto;
-import com.haratres.todo.entity.Otp;
-import com.haratres.todo.entity.Users;
-import com.haratres.todo.repository.OtpRepository;
-import com.haratres.todo.repository.UsersRepository;
-import com.haratres.todo.services.SendEmailService;
-import com.haratres.todo.util.OtpUtil;
+import com.haratres.todo.services.email.SendEmailService;
 import com.haratres.todo.validators.EmailValidators;
+import com.haratres.todo.validators.OtpValidators;
+import com.haratres.todo.validators.PasswordValidators;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ForgottenPasswordController {
-
-    @Autowired
-    UsersRepository usersRepository;
-
-    @Autowired
-    OtpRepository otpRepository;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    OtpUtil otpUtil;
+public class ForgottenPasswordController extends BaseController{
 
     @Autowired
     SendEmailService sendEmailService;
 
     @Autowired
-    EmailValidators emailValidators;
+    OtpValidators otpValidators;
 
     @Autowired
-    Validationhandler validationhandler;
+    PasswordValidators passwordValidators;
+
+    @Autowired
+    EmailValidators emailValidators;
 
     @PermitAll
     @PostMapping("/forgotten-password-send-otp")
-    public ResponseEntity<?> forgetPassword(@RequestBody ForgottenPasswordOtpDto forgottenPasswordOtpDto, Errors errors) {
-
-        emailValidators.validate(forgottenPasswordOtpDto,errors);
-
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(validationhandler.validate(errors));
-        }
-
-        Users users=usersRepository.findByEmail(forgottenPasswordOtpDto.getEmail()).get();
-
-
-        int userId=users.getId();
-        String userıd=String.valueOf(userId);
-        String otpCode=otpUtil.createOtp(users.getEmail(),userıd);
-        sendEmailService.sendEmail(users,otpCode);
-
-        return ResponseEntity.ok().build();
-
+    public ResponseEntity<?> forgetPassword(@RequestBody ForgottenPasswordOtpDto forgottenPasswordOtpDto) {
+        validate(forgottenPasswordOtpDto,"forgettenPassword",emailValidators);
+        return sendEmailService.forgetPasswordService(forgottenPasswordOtpDto);
     }
+
     @PreAuthorize("hasRole('USER')")
-    @PostMapping("/forgotten-password-verfiy")
-    public ResponseEntity<?> enterEmailandOtp(@RequestBody ForgottenPasswordOtpDto forgottenPasswordOtpDto,Errors errors) {
-        emailValidators.validate(forgottenPasswordOtpDto,errors);
-
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(validationhandler.validate(errors));
-        }
-
-        String otpCode = forgottenPasswordOtpDto.getOtp();
-        Users user = usersRepository.findByEmail(forgottenPasswordOtpDto.getEmail()).get();
-
-        Otp otp = otpRepository.findTopByEmailOrderByIdDesc(forgottenPasswordOtpDto.getEmail());
-
-        if (otpCode.equals(otp.getOtp()) && forgottenPasswordOtpDto.getEmail().equals(user.getEmail())) {
-            otp.setVerified(true);
-            otpRepository.save(otp);
-            return ResponseEntity.ok(true);
-        }
-        otp.setVerified(false);
-        otpRepository.save(otp);
-        return ResponseEntity.ok(false);
+    @PostMapping("/forgotten-password-verify")
+    public ResponseEntity<?> verifyPassword(@RequestBody ForgottenPasswordOtpDto forgottenPasswordOtpDto) {
+        validate(forgottenPasswordOtpDto,"forgettenPassword",otpValidators);
+        return sendEmailService.verifyOtp(forgottenPasswordOtpDto);
     }
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/forgotten-password-reset")
-    public ResponseEntity<?> enterNewPassword(@RequestBody ForgottenPasswordOtpDto forgottenPasswordOtpDto,Errors errors) {
-
-        emailValidators.validate(forgottenPasswordOtpDto,errors);
-
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(validationhandler.validate(errors));
-        }
-
-
-        String newPassword = forgottenPasswordOtpDto.getNewPassword();
-        String newPasswordAgain = forgottenPasswordOtpDto.getNewPasswordAgain();
-
-        Otp otp = otpRepository.findTopByEmailOrderByIdDesc(forgottenPasswordOtpDto.getEmail());
-        if (otp.isVerified() == true && newPassword.equals(newPasswordAgain)) {
-            Users users = usersRepository.findByEmail(forgottenPasswordOtpDto.getEmail()).get();
-            users.setPassword(passwordEncoder.encode(newPassword));
-            usersRepository.save(users);
-            return ResponseEntity.ok(true);
-        }
-        return ResponseEntity.ok(false);
+    public ResponseEntity<?> resetPassword(@RequestBody ForgottenPasswordOtpDto forgottenPasswordOtpDto) {
+        validate(forgottenPasswordOtpDto,"forgettenPassword",passwordValidators);
+        sendEmailService.resetPassword(forgottenPasswordOtpDto);
+        return ResponseEntity.ok().build();
     }
 }
