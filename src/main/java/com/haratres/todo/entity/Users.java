@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name="users")
+@Table(name = "users")
 public class Users {
 
     @Id
@@ -30,27 +29,19 @@ public class Users {
     @Column(name = "email")
     private String email;
 
-    @Column(name="tel")
+    @Column(name = "tel")
     private String tel;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {
-            CascadeType.MERGE,
-            CascadeType.DETACH,
-            CascadeType.REFRESH
-    })
-    @JoinTable(name = "user_roles",
-            joinColumns = {
-                    @JoinColumn(name = "user_id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "role_id") })
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+    @JoinTable(name = "user_roles", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "role_id")})
     @JsonManagedReference("user-role")
     private Set<Roles> roles;
 
-
-
-    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "users")
     private List<Tasks> tasks;
+
+    @OneToMany(mappedBy = "users")
+    private List<UserImage> userImages;
 
     public Tasks getTasks(int id) {
         return tasks.get(id);
@@ -69,15 +60,26 @@ public class Users {
         this.tel = tel;
     }
 
+    public List<UserImage> getUserImages() {
+        return userImages;
+    }
+
+    public void setUserImages(List<UserImage> userImages) {
+        this.userImages = userImages;
+    }
+
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
+
     public String getFirstName() {
         return firstName;
     }
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -85,21 +87,27 @@ public class Users {
     public String getLastName() {
         return lastName;
     }
+
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
+
     public List<Tasks> getTasks() {
         return tasks;
     }
+
     public void setTasks(List<Tasks> tasks) {
         this.tasks = tasks;
     }
+
     public void setTel(String tel) {
         this.tel = tel;
     }
@@ -124,15 +132,4 @@ public class Users {
         this.id = id;
     }
 
-    @Override
-    public String toString() {
-        return "Users{" +
-                "email='" + email + '\'' +
-                ", id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", password='" + password + '\'' +
-                ", tasks=" + tasks +
-                '}';
-    }
 }

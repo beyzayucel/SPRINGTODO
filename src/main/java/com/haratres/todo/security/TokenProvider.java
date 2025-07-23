@@ -1,4 +1,4 @@
-package com.haratres.todo.config;
+package com.haratres.todo.security;
 
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,8 +50,7 @@ public class TokenProvider {
         if(bearerToken!=null && bearerToken.startsWith("Bearer ")){
             return bearerToken.substring(7);
         }
-    log.warn("Authorization didn't found or doesn't start with 'Bearer '");
-    return null;
+        return null;
     }
 
     public String getEmailFromToken(String token){
@@ -79,8 +78,7 @@ public class TokenProvider {
                 .getBody();
         String authoritiesClaim = (String) claims.get(AUTHORITIES_KEY);
 
-        List<GrantedAuthority> authorities = Arrays.stream(authoritiesClaim.split(","))
-                .map(String::trim)
+        List<GrantedAuthority> authorities = Arrays.stream(authoritiesClaim.split(",")).map(String::trim)
                 .filter(role -> !role.isEmpty())
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());

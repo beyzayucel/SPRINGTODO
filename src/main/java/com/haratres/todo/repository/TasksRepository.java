@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -19,4 +20,9 @@ public interface TasksRepository extends JpaRepository<Tasks, Integer> {
     @Query("select t from Tasks t where t.users=:user order by t.createdDate asc")
     List<Tasks> sortByDate(@Param("user") Users users);
 
+    @Query("select t from Tasks t where t.users=:user and t.id=:id")
+    Tasks getTasksById(@Param("id")int id, @Param("user") Users users);
+
+    @Query("select t from Tasks t where t.users=:user and t.title=:title")
+    Tasks getTasksByTitle(@Param("title")String title, @Param("user") Users users);
 }

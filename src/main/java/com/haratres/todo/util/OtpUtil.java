@@ -1,7 +1,6 @@
 package com.haratres.todo.util;
 
 import com.haratres.todo.entity.Otp;
-import com.haratres.todo.entity.Users;
 import com.haratres.todo.repository.OtpRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

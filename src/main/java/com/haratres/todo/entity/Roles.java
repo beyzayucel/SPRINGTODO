@@ -20,7 +20,7 @@ public class Roles {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @ManyToMany(fetch = FetchType.EAGER,mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles")
     @JsonBackReference("user-role")
     private Set<Users> users;
 
